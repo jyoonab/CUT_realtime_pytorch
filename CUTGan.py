@@ -11,7 +11,7 @@ import json
 import time
 
 class CUTGan():
-    def __init__(self):
+    def __init__(self, target_image):
         '''Create Options'''
         parser = argparse.ArgumentParser()
 
@@ -22,6 +22,7 @@ class CUTGan():
             parser.add_argument(key, nargs='?', default=json_data[key])
 
         self.opt = parser.parse_args()
+        self.target_image_path = target_image
 
         # hard-code some parameters for test
         self.opt.num_threads = 0   # test code only supports num_threads = 1
@@ -29,23 +30,51 @@ class CUTGan():
         self.opt.serial_batches = True  # disable data shuffling; comment this line if results on randomly chosen images are needed.
         self.opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
         self.opt.display_id = -1   # no visdom display; the test code saves the results to a HTML file.
+        self.opt.crop_size = 512
+        #self.opt.name = 'raiden_CUT'
 
+        self.init_model()
+
+
+    '''initialize model'''
+    def init_model(self):
         '''Create Model'''
         self.model = create_model(self.opt)      # create a model given opt.model and other options
+        self.transform = get_transform(self.opt)
+
+        init_A_path = './images\\7.png'
+
+        init_A_image = Image.open(init_A_path).convert('RGB')
+        init_B_image = Image.open(self.target_image_path).convert('RGB')
+
+        init_A = self.transform(init_A_image)
+        init_B = self.transform(init_B_image)
+
+        preprocessed_init_data = torch.utils.data.DataLoader(
+            [{'A': init_A, 'B': init_B, 'A_paths': init_A_path, 'B_paths': self.target_image_path}],
+            batch_size = self.opt.batch_size,
+            shuffle = not self.opt.serial_batches,
+            num_workers = int(0),
+            drop_last = False,
+            )
+
+        for i, data in enumerate(preprocessed_init_data):
+            self.model.data_dependent_initialize(data)
+            self.model.setup(self.opt)               # regular setup: load and print networks; create schedulers
+            self.model.parallelize()
 
 
     '''Start Converting Image'''
-    def start_converting(self, A_path, B_path):
+    def start_converting(self, input_image_path):
         '''Preprocess Image'''
-        A_image = Image.open(A_path).convert('RGB')
-        B_image = Image.open(B_path).convert('RGB')
+        A_image = Image.open(input_image_path).convert('RGB')
+        B_image = Image.open(self.target_image_path).convert('RGB')
 
-        transform = get_transform()
-        A = transform(A_image)
-        B = transform(B_image)
+        A = self.transform(A_image)
+        B = self.transform(B_image)
 
         preprocessed_data = torch.utils.data.DataLoader(
-            [{'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}],
+            [{'A': A, 'B': B, 'A_paths': input_image_path, 'B_paths': self.target_image_path}],
             batch_size = self.opt.batch_size,
             shuffle = not self.opt.serial_batches,
             num_workers = int(0),
@@ -55,35 +84,30 @@ class CUTGan():
 
         '''Start Converting Image'''
         for i, data in enumerate(preprocessed_data):
-            self.model.data_dependent_initialize(data)
-
-            self.model.setup(self.opt)               # regular setup: load and print networks; create schedulers
-            self.model.parallelize()
-
             self.model.set_input(data)  # unpack data from data loader
             self.model.test()           # run inference
 
             visuals = self.model.get_current_visuals()  # get image results
 
-            start = time.time()
-
             image_result = tensor2im(visuals['fake_B'])
-
             image_result = cv2.cvtColor(image_result, cv2.COLOR_RGB2BGR)
 
-            print("time :", time.time() - start)
-
+            '''
             h, w, c = image_result.shape
             print('width:  ', w)
             print('height: ', h)
             print('channel:', c)
+            '''
 
-            cv2.imshow('video', image_result)
-            cv2.waitKey(0)
+            #cv2.imshow('video', image_result)
+            #cv2.waitKey(0)
 
 if __name__ == '__main__':
-    A_path = './images\\3.png'
-    B_path = './images\\4.png'
+    start = time.time()
+    cut = CUTGan('./images\\4.png')
+    print("time :", time.time() - start)
 
-    cut = CUTGan()
-    cut.start_converting(A_path, B_path)
+    for i in range(3):
+        start = time.time()
+        cut.start_converting('./images\\3.png')
+        print("time :", time.time() - start)

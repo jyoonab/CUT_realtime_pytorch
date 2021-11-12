@@ -5,6 +5,7 @@ from . import networks
 from .patchnce import PatchNCELoss
 import utility as util
 
+import time
 
 class CUTModel(BaseModel):
     """ This class implements CUT and FastCUT model, described in the paper
@@ -98,17 +99,18 @@ class CUTModel(BaseModel):
         initialized at the first feedforward pass with some input images.
         Please also see PatchSampleF.create_mlp(), which is called at the first forward() call.
         """
+
         self.set_input(data)
+
+
         bs_per_gpu = self.real_A.size(0) // max(len(self.opt.gpu_ids), 1)
+
         self.real_A = self.real_A[:bs_per_gpu]
         self.real_B = self.real_B[:bs_per_gpu]
+
+        start = time.time()
         self.forward()                     # compute fake images: G(A)
-        if self.opt.isTrain:
-            self.compute_D_loss().backward()                  # calculate gradients for D
-            self.compute_G_loss().backward()                   # calculate graidents for G
-            if self.opt.lambda_NCE > 0.0:
-                self.optimizer_F = torch.optim.Adam(self.netF.parameters(), lr=self.opt.lr, betas=(self.opt.beta1, self.opt.beta2))
-                self.optimizers.append(self.optimizer_F)
+        print("time inside :", time.time() - start)
 
     def optimize_parameters(self):
         # forward
@@ -144,17 +146,18 @@ class CUTModel(BaseModel):
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
+        #start = time.time()
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.real = torch.cat((self.real_A, self.real_B), dim=0) if self.opt.nce_idt and self.opt.isTrain else self.real_A
         if self.opt.flip_equivariance:
             self.flipped_for_equivariance = self.opt.isTrain and (np.random.random() < 0.5)
             if self.flipped_for_equivariance:
                 self.real = torch.flip(self.real, [3])
-
         self.fake = self.netG(self.real)
         self.fake_B = self.fake[:self.real_A.size(0)]
         if self.opt.nce_idt:
             self.idt_B = self.fake[self.real_A.size(0):]
+        #print("time inside :", time.time() - start)
 
     def compute_D_loss(self):
         """Calculate GAN loss for the discriminator"""
