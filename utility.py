@@ -42,7 +42,6 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 def tensor2im(input_image, imtype=np.uint8):
-    start = time.time()
     if not isinstance(input_image, np.ndarray):
         if isinstance(input_image, torch.Tensor):  # get the data from a variable
             image_tensor = input_image.data
@@ -54,8 +53,6 @@ def tensor2im(input_image, imtype=np.uint8):
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0  # post-processing: tranpose and scaling
     else:  # if it is a numpy array, do nothing
         image_numpy = input_image
-
-    print("time inside :", time.time() - start)
 
     return image_numpy.astype(imtype)
 

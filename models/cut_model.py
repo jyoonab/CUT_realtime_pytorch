@@ -108,9 +108,7 @@ class CUTModel(BaseModel):
         self.real_A = self.real_A[:bs_per_gpu]
         self.real_B = self.real_B[:bs_per_gpu]
 
-        start = time.time()
         self.forward()                     # compute fake images: G(A)
-        print("time inside :", time.time() - start)
 
     def optimize_parameters(self):
         # forward
@@ -146,7 +144,6 @@ class CUTModel(BaseModel):
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
-        #start = time.time()
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         self.real = torch.cat((self.real_A, self.real_B), dim=0) if self.opt.nce_idt and self.opt.isTrain else self.real_A
         if self.opt.flip_equivariance:
@@ -157,7 +154,6 @@ class CUTModel(BaseModel):
         self.fake_B = self.fake[:self.real_A.size(0)]
         if self.opt.nce_idt:
             self.idt_B = self.fake[self.real_A.size(0):]
-        #print("time inside :", time.time() - start)
 
     def compute_D_loss(self):
         """Calculate GAN loss for the discriminator"""

@@ -31,7 +31,6 @@ class CUTGan():
         self.opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
         self.opt.display_id = -1   # no visdom display; the test code saves the results to a HTML file.
         self.opt.crop_size = 512
-        #self.opt.name = 'raiden_CUT'
 
         self.init_model()
 
@@ -65,16 +64,17 @@ class CUTGan():
 
 
     '''Start Converting Image'''
-    def start_converting(self, input_image_path):
+    def start_converting(self, input_frame):
         '''Preprocess Image'''
-        A_image = Image.open(input_image_path).convert('RGB')
+        input_frame = cv2.cvtColor(input_frame, cv2.COLOR_RGB2BGR)
+        A_image = Image.fromarray(np.uint8(input_frame))
         B_image = Image.open(self.target_image_path).convert('RGB')
 
         A = self.transform(A_image)
         B = self.transform(B_image)
 
         preprocessed_data = torch.utils.data.DataLoader(
-            [{'A': A, 'B': B, 'A_paths': input_image_path, 'B_paths': self.target_image_path}],
+            [{'A': A, 'B': B, 'A_paths': "", 'B_paths': self.target_image_path}],
             batch_size = self.opt.batch_size,
             shuffle = not self.opt.serial_batches,
             num_workers = int(0),
@@ -88,26 +88,27 @@ class CUTGan():
             self.model.test()           # run inference
 
             visuals = self.model.get_current_visuals()  # get image results
-
             image_result = tensor2im(visuals['fake_B'])
-            image_result = cv2.cvtColor(image_result, cv2.COLOR_RGB2BGR)
 
-            '''
-            h, w, c = image_result.shape
-            print('width:  ', w)
-            print('height: ', h)
-            print('channel:', c)
-            '''
+        image_result = cv2.cvtColor(image_result, cv2.COLOR_RGB2BGR)
 
-            #cv2.imshow('video', image_result)
-            #cv2.waitKey(0)
+        return image_result
 
+
+
+'''TEST CODE'''
 if __name__ == '__main__':
     start = time.time()
     cut = CUTGan('./images\\4.png')
     print("time :", time.time() - start)
 
-    for i in range(3):
+    test_image = Image.open('./images\\3.png')
+    #test_image_np = np.array(test_image)
+    test_image_np = cv2.cvtColor(np.array(test_image), cv2.COLOR_BGR2RGB)
+
+    for i in range(1):
         start = time.time()
-        cut.start_converting('./images\\3.png')
+        image_result = cut.start_converting(test_image_np)
+        cv2.imshow('video', image_result)
+        cv2.waitKey(0)
         print("time :", time.time() - start)
