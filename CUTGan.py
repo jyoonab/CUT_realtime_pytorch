@@ -31,12 +31,9 @@ class CUTGan():
         self.opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
         self.opt.display_id = -1   # no visdom display; the test code saves the results to a HTML file.
         self.opt.crop_size = 512
-<<<<<<< HEAD
-=======
-        self.opt.name = "face2cartoon_v3_CUT"
+        self.opt.name = "face2comics_FastCUT"
 
         print(self.opt.name)
->>>>>>> 112b214 (perf tools added)
 
         self.init_model()
 
@@ -108,11 +105,7 @@ if __name__ == '__main__':
     cut = CUTGan('./images\\4.png')
     print("time :", time.time() - start)
 
-<<<<<<< HEAD
-    test_image = Image.open('./images\\3.png')
-=======
     test_image = Image.open('./images\\test.png')
->>>>>>> 112b214 (perf tools added)
     #test_image_np = np.array(test_image)
     test_image_np = cv2.cvtColor(np.array(test_image), cv2.COLOR_BGR2RGB)
 

@@ -21,11 +21,7 @@
   "load_size": 256,
   "model": "cut",
   "n_layers_D": 3,
-<<<<<<< HEAD
-  "name": "cartoon",
-=======
   "name": "face2cartoon_v3_FastCUT",
->>>>>>> 112b214 (perf tools added)
   "nce_T": 0.07,
   "nce_idt": true,
   "nce_includes_all_negatives_from_minibatch": false,

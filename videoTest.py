@@ -1,13 +1,6 @@
 import cv2
 import numpy as np
 import time
-<<<<<<< HEAD
-
-from CUTGan import CUTGan
-
-if __name__ == '__main__':
-
-=======
 import mediapipe as mp
 
 from CUTGan import CUTGan
@@ -44,19 +37,10 @@ class FaceDetector_v1:
 
 if __name__ == '__main__':
     face_detector = FaceDetector_v1()
->>>>>>> 112b214 (perf tools added)
     cut_gan = CUTGan('./images\\4.png')
 
     cap = cv2.VideoCapture(0)
     while cv2.waitKey(33) < 0:
-<<<<<<< HEAD
-        ret, frame = cap.read()
-        if ret:
-            start_time = time.time()
-
-            frame = cv2.resize(frame, dsize=(512, 512), interpolation=cv2.INTER_LINEAR)
-            image_result = cut_gan.start_converting(frame)
-=======
         success, frame = cap.read()
         if success:
             ''' Pre-setting '''
@@ -97,17 +81,11 @@ if __name__ == '__main__':
                 print("No Face Found")
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 result_frame = frame
->>>>>>> 112b214 (perf tools added)
 
             end_time = time.time()
             fps = np.round(1 / np.round(end_time - start_time, 3), 1)
 
             print(fps)
-<<<<<<< HEAD
-            cv2.imshow('video', image_result)
-
-=======
             cv2.imshow('video', result_frame)
->>>>>>> 112b214 (perf tools added)
     cap.release()
     cv2.destroyAllWindows()
