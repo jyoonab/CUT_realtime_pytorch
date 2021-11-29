@@ -6,8 +6,6 @@ import mediapipe as mp
 from CUTGan import CUTGan
 from math import hypot
 
-nose_image = cv2.imread("pig_nose.png")
-
 class FaceDetector_v1:
     def __init__(self) -> None:
         super(FaceDetector_v1, self).__init__()

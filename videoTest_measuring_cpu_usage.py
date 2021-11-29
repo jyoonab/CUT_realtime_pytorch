@@ -7,6 +7,7 @@ import threading
 
 from datetime import datetime
 from CUTGan import CUTGan
+from PIL import Image
 
 def start_measuring_cpu():
     cpu_usage_list = []
@@ -36,7 +37,7 @@ def start_measuring_cpu():
 
 if __name__ == '__main__':
     #total_cpu_usage = []
-    cut_gan = CUTGan('./images\\4.png')
+    cut_gan = CUTGan('./images\\9.jpg')
 
     t = threading.Thread(target=start_measuring_cpu)
 
@@ -48,8 +49,12 @@ if __name__ == '__main__':
         ret, frame = cap.read()
         if ret:
             frame = cv2.resize(frame, dsize=(512, 512), interpolation=cv2.INTER_LINEAR)
+            #frame = Image.open('./images\\iu.jpg')
+            #frame = np.array(frame) #pil to cv
+            #frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
             image_result = cut_gan.start_converting(frame)
             cv2.imshow('video', image_result)
+            cv2.imshow('frame', frame)
     #print(total_cpu_usage)
     #print('# of Count', len(total_cpu_usage))
     #print('Average CPU Usage', statistics.mean(total_cpu_usage))

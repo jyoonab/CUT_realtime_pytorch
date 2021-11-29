@@ -31,7 +31,7 @@ class CUTGan():
         self.opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
         self.opt.display_id = -1   # no visdom display; the test code saves the results to a HTML file.
         self.opt.crop_size = 512
-        self.opt.name = "face2comics_FastCUT"
+        self.opt.name = "old"
 
         print(self.opt.name)
 
